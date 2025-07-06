@@ -1,15 +1,34 @@
 import { useEffect, useState } from 'react'
 import './App.css';
 
-function App() {
+function  App () {
   const [showPopUp, setpopUp] = useState(false);
-  const [formdata, setFormdata] = useState({Title : '', Desc : '', Producer: ''});
+  const [formdata, setFormdata] = useState({ Title: '', Desc: '', Producer: '' });
+  const [movies, setMovies] = useState([]);
 
-  const handleChange = (e) => {      
-    const {name, value} = e.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     console.log(name, value);
-    setFormdata(prev => ({...prev, [name] : value}));
+    setFormdata(prev => ({ ...prev, [name]: value }));
   }
+
+  const getAllMovies = async () => {
+    const getRes = await fetch("http://localhost:5197/movies", {
+      method: "GET",
+    })
+
+    if (!getRes.ok) {
+      throw new Error("Not Able to fetch the movies");
+    }
+
+    const res1 = await getRes.json();
+    setMovies(res1);
+  }
+
+  useEffect(() => {
+    console.log(movies);      q
+    getAllMovies();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,27 +36,21 @@ function App() {
     console.log("form data ", formdata);
     try {
 
-      const getRes = await fetch("http://localhost:5197/movies", {
-        method: "GET",
-      })
-
-      const res1 = await getRes.text();
-      console.log(res1);
-
       const response = await fetch("http://localhost:5197/movies", {
         method: "POST",
         headers: {
-          "Content-Type" : "application/json"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(formdata)
       });
-      
-      const res = await response.json();
 
-      
-      console.log("We are getting this repsonse by sending movie details", res);
-      setFormdata({Title : '', Desc : '' , Producer : '' });
-      setpopUp(false); 
+
+
+      const res = await response.text();
+      console.log("Response after adding one more movie detail", res);
+
+      setFormdata({ Title: '', Desc: '', Producer: '' });
+      setpopUp(false);
 
     } catch (error) {
 
@@ -46,47 +59,73 @@ function App() {
 
   }
 
-  return ( 
-  <div>
-    <h1>Movies App</h1>
-    <button onClick={() => {setpopUp(true)}}>Add A new Movie</button> 
-    {
-      showPopUp && (<div class = "pop-up"> 
-      <h2>Add the content</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="Title"
-          value={formdata.Title}
-          onChange={handleChange}
-          placeholder='Movie title'
-          required
-        />
-        <br/>
+  return (
+    <div className='main-container'>
+      <h1 style={{ textAlign: 'center' }}>Movies App</h1>
+      <table className='Table'>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Producer</th>
+            <th>Description</th>
+            <th> <button onClick={() => { setpopUp(true) }} style={{ backgroundColor: 'green' }}>Add A new Movie</button>
+              {
+                showPopUp && (<div className="pop-up-container">
+                  <div className="pop-up">
 
-         <input
-          type="text"
-          name="Producer"
-          value={formdata.Producer}
-          onChange={handleChange}
-          placeholder='Movie Producer'
-          required
-        />
+                    <h2>Add the content</h2>
+                    <form onSubmit={handleSubmit}>
+                      <input
+                        className='input-bar'
+                        type="text"
+                        name="Title"
+                        value={formdata.Title}
+                        onChange={handleChange}
+                        placeholder='Movie title'
+                        required
+                      />
+                      <br />
+                      <input
+                        className='input-bar'
+                        type="text"
+                        name="Producer"
+                        value={formdata.Producer}
+                        onChange={handleChange}
+                        placeholder='Movie Producer'
+                        required
+                      />
+                      <textarea
+                        name="Desc"
+                        className='input-bar'
+                        value={formdata.Desc}
+                        onChange={handleChange}
+                        placeholder='description'
+                        required
+                      />
+                      <br />
+                      <button type="submit" >Submit</button>
+                    </form>
+                  </div>
+                </div>)
+              }</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            movies.map(element => {
+              return
+              (<tr key={element.id}>
+                <td>{element.title}</td>
+                <td>{element.desc}</td>
+                <td>{element.producer}</td>
+              </tr>)
+            })
+          }
 
-        <textarea 
-          name="Desc"
-          value={formdata.Desc}
-          onChange={handleChange}
-          placeholder='description'
-          required
-        />
+        </tbody>
+      </table>
 
-        <br/>
-        <button type="submit" >Submit</button>
-      </form>
-      </div>)
-    }
-  </div>
+    </div>
   )
 }
 

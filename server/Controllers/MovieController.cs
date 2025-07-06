@@ -1,3 +1,4 @@
+using System.Data.Entity;
 using Microsoft.AspNetCore.Mvc;
 using server.Data;
 using server.models;
@@ -18,7 +19,8 @@ public class MovieController : Controller
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok("connection is maintained");
+        var movies =  _context.Movies.ToList();
+        return Ok(movies);
     }
     
     [HttpPost]
