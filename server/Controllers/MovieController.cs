@@ -19,10 +19,10 @@ public class MovieController : Controller
     [HttpGet]
     public IActionResult Get()
     {
-        var movies =  _context.Movies.ToList();
+        var movies = _context.Movies.ToList();
         return Ok(movies);
     }
-    
+
     [HttpPost]
     public IActionResult AddMovie([FromBody] Movie movie)
     {
@@ -31,5 +31,24 @@ public class MovieController : Controller
         _context.Movies.Add(movie);
         _context.SaveChanges();
         return Ok("Movie is successfully added");
+    }
+
+    [HttpDelete]
+    [Route("{id}")]
+    public async Task<IActionResult> DeleteMovie(Guid id)
+    {
+        var movie = await _context.Movies.FindAsync(id);
+        if (movie == null)
+        {
+            return NotFound(new
+            {
+                message =
+                    "Movie not found"
+            });
+        }
+
+        _context.Movies.Remove(movie);
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Movie deleted successfully" });
     }
 }

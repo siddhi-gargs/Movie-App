@@ -26,10 +26,25 @@ function  App () {
   }
 
   useEffect(() => {
-    console.log(movies);      q
-    getAllMovies();
-  }, []);
+  
+    console.log(movies);
+    getAllMovies().catch(console.error);
+  }, [movies]);
 
+  const removeThis = async(id) => {
+    try {
+      const response = await fetch(`http://localhost:5197/movies/${id}`, {
+        method: "DELETE"
+      })
+
+      const res = await response.text();
+      console.log(res)
+
+    } catch (error) {
+      console.error("Error from deleting the movie", error);
+    }
+  }
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -112,14 +127,14 @@ function  App () {
         </thead>
         <tbody>
           {
-            movies.map(element => {
-              return
+            movies.map(element => 
               (<tr key={element.id}>
                 <td>{element.title}</td>
                 <td>{element.desc}</td>
                 <td>{element.producer}</td>
+                <td><button style={{backgroundColor: "green"}} onClick={() => removeThis(element.id)}>Delete</button></td>
               </tr>)
-            })
+            )
           }
 
         </tbody>
